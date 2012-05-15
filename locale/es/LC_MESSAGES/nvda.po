@@ -1,0 +1,45 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ocr 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-09 15:09+0100\n"
+"PO-Revision-Date: 2012-05-14 13:54-0400\n"
+"Last-Translator: mk360 <mk.seventhson@gmail.com>\n"
+"Language-Team: mk360 <mk.seventhson@gmail.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: Chile\n"
+"X-Poedit-SourceCharset: iso-8859-1\n"
+
+#: globalPlugins/ocr/__init__.py:139
+msgid "Ocr Settings..."
+msgstr "Configurar OCR..."
+
+#: globalPlugins/ocr/__init__.py:139
+msgid "Set OCR language"
+msgstr "Seleccionar idioma de OCR"
+
+#: globalPlugins/ocr/__init__.py:157
+msgid "Select OCR Language"
+msgstr "Seleccione el idioma del OCR"
+
+#: globalPlugins/ocr/__init__.py:157
+msgid "OCR Settings"
+msgstr "Configuración de OCR"
+
+#: globalPlugins/ocr/__init__.py:182
+msgid "Running OCR"
+msgstr "Ejecutando OCR"
+
+#: globalPlugins/ocr/__init__.py:209
+msgid "Done"
+msgstr "Listo"
+

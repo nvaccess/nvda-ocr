@@ -13,11 +13,21 @@ import tempfile
 import subprocess
 from xml.parsers import expat
 from collections import namedtuple
+from cStringIO import StringIO
+import config
 import globalPluginHandler
+import gui
 import api
+from logHandler import log
+import languageHandler
+import addonHandler
+addonHandler.initTranslation()
 import textInfos.offsets
 import ui
 
+import configobj
+import validate
+import wx
 PLUGIN_DIR = os.path.dirname(__file__)
 TESSERACT_EXE = os.path.join(PLUGIN_DIR, "tesseract", "tesseract.exe")
 
@@ -122,7 +132,40 @@ class OcrTextInfo(textInfos.offsets.OffsetsTextInfo):
 		return textInfos.Point(word.left, word.top)
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
+	def __init__(self):
+		super(globalPluginHandler.GlobalPlugin, self).__init__()
+		self.prefsMenu = gui.mainFrame.sysTrayIcon.menu.GetMenuItems()[0].GetSubMenu()
+		self.ocrSettingsItem = self.prefsMenu.Append(wx.ID_ANY, _("Ocr Settings..."), _("Set OCR language"))
+		gui.mainFrame.sysTrayIcon.Bind(wx.EVT_MENU, self.onOCRSettings, self.ocrSettingsItem)
 
+	def terminate(self):
+		try:
+			self.prefsMenu.RemoveItem(self.ocrSettingsItem)
+		except wx.PyDeadObjectError:
+			pass
+
+	def onOCRSettings(self, event):
+		# Pop a dialog with available OCR languages to set
+		langs = sorted(getAvailableTesseractLanguages())
+		curlang = getConfig()['language']
+		try:
+			select = langs.index(curlang)
+		except ValueError:
+			select = langs.index('eng')
+		choices = [languageHandler.getLanguageDescription(tesseractLangsToLocales[lang]) or tesseractLangsToLocales[lang] for lang in langs]
+		log.debug(u"Available OCR languages: %s", u", ".join(choices))
+		dialog = wx.SingleChoiceDialog(gui.mainFrame, _("Select OCR Language"), _("OCR Settings"), choices=choices)
+		dialog.SetSelection(select)
+		gui.mainFrame.prePopup()
+		ret = dialog.ShowModal()
+		gui.mainFrame.postPopup()
+		if ret == wx.ID_OK:
+			lang = langs[dialog.GetSelection()]
+			getConfig()['language'] = lang
+			try:
+				getConfig().write()
+			except IOError:
+				log.error("Error writing ocr configuration", exc_info=True)
 	def script_ocrNavigatorObject(self, gesture):
 		nav = api.getNavigatorObject()
 		left, top, width, height = nav.location
@@ -136,12 +179,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			imgFile = baseFile + ".bmp"
 			img.save(imgFile)
 
-			ui.message("Performing OCR")
+			ui.message(_("Running OCR"))
+			lang = getConfig()['language']
 			# Hide the Tesseract window.
 			si = subprocess.STARTUPINFO()
 			si.dwFlags = subprocess.STARTF_USESHOWWINDOW
 			si.wShowWindow = subprocess.SW_HIDE
-			subprocess.check_call((TESSERACT_EXE, imgFile, baseFile, "hocr"),
+			subprocess.check_call((TESSERACT_EXE, imgFile, baseFile, "-l", lang, "hocr"),
 				startupinfo=si)
 		finally:
 			try:
@@ -162,8 +206,68 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Let the user review the OCR output.
 		nav.makeTextInfo = lambda position: OcrTextInfo(nav, position, parser)
 		api.setReviewPosition(nav.makeTextInfo(textInfos.POSITION_FIRST))
-		ui.message("Done")
+		ui.message(_("Done"))
 
 	__gestures = {
 		"kb:NVDA+r": "ocrNavigatorObject",
 	}
+
+localesToTesseractLangs = {
+"bg" : "bul",
+"ca" : "cat",
+"cs" : "ces",
+"zh_CN" : "chi_tra",
+"da" : "dan",
+"de" : "deu",
+"el" : "ell",
+"en" : "eng",
+"fi" : "fin",
+"fr" : "fra",
+"hu" : "hun",
+"id" : "ind",
+"it" : "ita",
+"ja" : "jpn",
+"ko" : "kor",
+"lv" : "lav",
+"lt" : "lit",
+"nl" : "nld",
+"nb_NO" : "nor",
+"pl" : "pol",
+"pt" : "por",
+"ro" : "ron",
+"ru" : "rus",
+"sk" : "slk",
+"sl" : "slv",
+"es" : "spa",
+"sr" : "srp",
+"sv" : "swe",
+"tg" : "tgl",
+"tr" : "tur",
+"uk" : "ukr",
+"vi" : "vie"
+}
+tesseractLangsToLocales = {v : k for k, v in localesToTesseractLangs.iteritems()}
+
+def getAvailableTesseractLanguages():
+	dataDir = unicode(os.path.join(os.path.dirname(__file__), "tesseract", "tessdata"), "mbcs")
+	dataFiles = [file for file in os.listdir(dataDir) if file.endswith(u'.traineddata')]
+	return [os.path.splitext(file)[0] for file in dataFiles]
+
+def getDefaultLanguage():
+	lang = languageHandler.getLanguage()
+	if lang not in localesToTesseractLangs and "_" in lang:
+		lang = lang.split("_")[0]
+	return localesToTesseractLangs.get(lang, "eng")
+
+_config = None
+configspec = StringIO("""
+language=string(default={defaultLanguage})
+""".format(defaultLanguage=getDefaultLanguage()))
+def getConfig():
+	global _config
+	if not _config:
+		path = os.path.join(config.getUserDefaultConfigPath(), "ocr.ini")
+		_config = configobj.ConfigObj(path, configspec=configspec)
+		val = validate.Validator()
+		_config.validate(val)
+	return _config
