@@ -2,9 +2,9 @@
 This plugin uses Tesseract for OCR: http://code.google.com/p/tesseract-ocr/
 It also uses the Python Imaging Library (PIL): http://www.pythonware.com/products/pil/
 @author: James Teh <jamie@nvaccess.org>
-@copyright: 2011 NV Access Limited
+@author: Rui Batista <ruiandrebatista@gmail.com>
+@copyright: 2011-2012 NV Access Limited, Rui Batista
 @license: GNU General Public License version 2.0
-@version: 2011-11-09-01
 """
 
 import sys
