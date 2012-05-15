@@ -14,6 +14,9 @@ import subprocess
 from xml.parsers import expat
 from collections import namedtuple
 from cStringIO import StringIO
+import configobj
+import validate
+import wx
 import config
 import globalPluginHandler
 import gui
@@ -25,9 +28,6 @@ addonHandler.initTranslation()
 import textInfos.offsets
 import ui
 
-import configobj
-import validate
-import wx
 PLUGIN_DIR = os.path.dirname(__file__)
 TESSERACT_EXE = os.path.join(PLUGIN_DIR, "tesseract", "tesseract.exe")
 
