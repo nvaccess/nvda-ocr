@@ -43,8 +43,8 @@ OcrWord = namedtuple("OcrWord", ("offset", "left", "top"))
 class HocrParser(object):
 
 	def __init__(self, xml, leftCoordOffset, topCoordOffset):
-		self._leftCoordOffset = leftCoordOffset
-		self._topCoordOffset = topCoordOffset
+		self.leftCoordOffset = leftCoordOffset
+		self.topCoordOffset = topCoordOffset
 		parser = expat.ParserCreate("utf-8")
 		parser.StartElementHandler = self._startElement
 		parser.EndElementHandler = self._endElement
@@ -70,8 +70,8 @@ class HocrParser(object):
 				title = attrs.get("title")
 				prefix, l, t, r, b = title.split(" ")
 				self.words.append(OcrWord(self.textLen,
-					self._leftCoordOffset + int(l) / IMAGE_RESIZE_FACTOR,
-					self._topCoordOffset + int(t) / IMAGE_RESIZE_FACTOR))
+					self.leftCoordOffset + int(l) / IMAGE_RESIZE_FACTOR,
+					self.topCoordOffset + int(t) / IMAGE_RESIZE_FACTOR))
 
 	def _endElement(self, tag):
 		pass
@@ -127,8 +127,7 @@ class OcrTextInfo(textInfos.offsets.OffsetsTextInfo):
 			word = nextWord
 		else:
 			# No matching word, so use the top left of the object.
-			l, t, w, h = self.obj.location
-			return textInfos.Point(l, t)
+			return textInfos.Point(self._parser.leftCoordOffset, self._parser.topCoordOffset)
 		return textInfos.Point(word.left, word.top)
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
