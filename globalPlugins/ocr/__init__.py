@@ -65,7 +65,7 @@ class HocrParser(object):
 			cls = attrs["class"]
 			if cls == "ocr_line":
 				self.lines.append(self.textLen)
-			elif cls == "ocr_word":
+			elif cls == "ocrx_word":
 				# Get the coordinates from the bbox info specified in the title attribute.
 				title = attrs.get("title")
 				prefix, l, t, r, b = title.split(" ")
