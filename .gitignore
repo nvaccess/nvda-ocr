@@ -4,3 +4,6 @@
 *.pyc
 *.nvda-addon
 .sconsign.dblite
+addon/globalPlugins/ocr/tesseract
+addon/globalPlugins/ocr/PIL
+deps
