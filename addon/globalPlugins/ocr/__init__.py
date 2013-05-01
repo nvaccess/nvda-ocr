@@ -133,7 +133,10 @@ class OcrTextInfo(textInfos.offsets.OffsetsTextInfo):
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self):
 		super(globalPluginHandler.GlobalPlugin, self).__init__()
-		self.ocrSettingsItem = gui.mainFrame.sysTrayIcon.preferencesMenu.Append(wx.ID_ANY, _("Ocr Settings..."), _("Set OCR language"))
+		self.ocrSettingsItem = gui.mainFrame.sysTrayIcon.preferencesMenu.Append(wx.ID_ANY,
+			# Translators: The name of the OCR settings item
+			# in the NVDA Preferences menu.
+			_("OCR settings..."))
 		gui.mainFrame.sysTrayIcon.Bind(wx.EVT_MENU, self.onOCRSettings, self.ocrSettingsItem)
 
 	def terminate(self):
