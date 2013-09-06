@@ -3,7 +3,7 @@ This plugin uses Tesseract for OCR: http://code.google.com/p/tesseract-ocr/
 It also uses the Python Imaging Library (PIL): http://www.pythonware.com/products/pil/
 @author: James Teh <jamie@nvaccess.org>
 @author: Rui Batista <ruiandrebatista@gmail.com>
-@copyright: 2011-2012 NV Access Limited, Rui Batista
+@copyright: 2011-2013 NV Access Limited, Rui Batista
 @license: GNU General Public License version 2.0
 """
 
@@ -34,6 +34,7 @@ TESSERACT_EXE = os.path.join(PLUGIN_DIR, "tesseract", "tesseract.exe")
 # Add bundled copy of PIL to module search path.
 sys.path.append(os.path.join(PLUGIN_DIR, "PIL"))
 import ImageGrab
+import Image
 del sys.path[-1]
 
 IMAGE_RESIZE_FACTOR = 2
@@ -174,7 +175,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Tesseract copes better if we convert to black and white...
 		img = img.convert(mode='L')
 		# and increase the size.
-		img = img.resize((width * IMAGE_RESIZE_FACTOR, height * IMAGE_RESIZE_FACTOR))
+		img = img.resize((width * IMAGE_RESIZE_FACTOR, height * IMAGE_RESIZE_FACTOR), Image.BICUBIC)
 		baseFile = os.path.join(tempfile.gettempdir(), "nvda_ocr")
 		try:
 			imgFile = baseFile + ".bmp"
