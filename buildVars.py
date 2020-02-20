@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 # Build customizations
 # Change this file instead of sconstruct or manifest files, whenever possible.
 
@@ -6,24 +8,35 @@ _ = lambda x : x
 
 # Add-on information variables
 addon_info = {
-	# add-on Name
-	"addon-name" : "ocr",
-	# Add-on summary
-	# TRANSLATORS: Summary for this add-on to be shown on installation and add-on information.
-	"addon-summary" : _("OCR"),
+	# for previously unpublished addons, please follow the community guidelines at:
+	# https://bitbucket.org/nvdaaddonteam/todo/raw/master/guidelines.txt
+	# add-on Name, internal for nvda
+	"addon_name" : "ocr",
+	# Add-on summary, usually the user visible name of the addon.
+	# Translators: Summary for this add-on to be shown on installation and add-on information.
+	"addon_summary" : _("OCR"),
 	# Add-on description
-	# Translators: Long description to be shown for this add-on on installation and add-on information
-	"addon-description" : _("""Performs optical character recognition (OCR) to extract text from an object which is inaccessible.
+	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
+	"addon_description" : _("""Performs optical character recognition (OCR) to extract text from an object which is inaccessible.
 The Tesseract OCR engine is used.
 To perform OCR, move to the object in question using object navigation and press NVDA+r.
 You can set the OCR recognition language by going to the NVDA preferences menu and selecting OCR settings."""),
 	# version
-	"addon-version" : "2013.1",
+	"addon_version" : "2020.1",
 	# Author(s)
-	"addon-author" : "NV Access Limited & other contributors",
+	"addon_author" : u"NV Access Limited <info@nvaccess.org>",
 	# URL for the add-on documentation support
-	"addon-url" : None
+	"addon_url" : None,
+	# Documentation file name
+	"addon_docFileName" : None,
+	# Minimum NVDA version supported (e.g. "2018.3.0", minor version is optional)
+	"addon_minimumNVDAVersion" : "2019.3.0",
+	# Last NVDA version supported/tested (e.g. "2018.4.0", ideally more recent than minimum version)
+	"addon_lastTestedNVDAVersion" : "2019.3.1",
+	# Add-on update channel (default is None, denoting stable releases, and for development releases, use "dev"; do not change unless you know what you are doing)
+	"addon_updateChannel" : None,
 }
+
 
 import os.path
 

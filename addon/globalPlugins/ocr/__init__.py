@@ -13,7 +13,7 @@ import tempfile
 import subprocess
 from xml.parsers import expat
 from collections import namedtuple
-from cStringIO import StringIO
+from io import StringIO
 import configobj
 import validate
 import wx
@@ -27,15 +27,13 @@ import addonHandler
 addonHandler.initTranslation()
 import textInfos.offsets
 import ui
+import locationHelper
 
 PLUGIN_DIR = os.path.dirname(__file__)
 TESSERACT_EXE = os.path.join(PLUGIN_DIR, "tesseract", "tesseract.exe")
 
-# Add bundled copy of PIL to module search path.
-sys.path.append(os.path.join(PLUGIN_DIR, "PIL"))
-import ImageGrab
-import Image
-del sys.path[-1]
+from .PIL import ImageGrab
+from .PIL import Image
 
 IMAGE_RESIZE_FACTOR = 2
 
@@ -60,21 +58,24 @@ class HocrParser(object):
 		del self._textList
 
 	def _startElement(self, tag, attrs):
+		print(f"ElementStart: {tag} {attrs}")
 		if tag in ("p", "div"):
 			self._hasBlockHadContent = False
 		elif tag == "span":
 			cls = attrs["class"]
 			if cls == "ocr_line":
 				self.lines.append(self.textLen)
-			elif cls == "ocrx_word":
+			elif cls == "ocr_word":
 				# Get the coordinates from the bbox info specified in the title attribute.
 				title = attrs.get("title")
+				print(f"title: {title}")
 				prefix, l, t, r, b = title.split(" ")
 				self.words.append(OcrWord(self.textLen,
 					self.leftCoordOffset + int(l) / IMAGE_RESIZE_FACTOR,
 					self.topCoordOffset + int(t) / IMAGE_RESIZE_FACTOR))
 
 	def _endElement(self, tag):
+		print(f"elementEnd: {tag}")
 		pass
 
 	def _charData(self, data):
@@ -128,8 +129,8 @@ class OcrTextInfo(textInfos.offsets.OffsetsTextInfo):
 			word = nextWord
 		else:
 			# No matching word, so use the top left of the object.
-			return textInfos.Point(self._parser.leftCoordOffset, self._parser.topCoordOffset)
-		return textInfos.Point(word.left, word.top)
+			return locationHelper.Point(int(self._parser.leftCoordOffset), int(self._parser.topCoordOffset))
+		return locationHelper.Point(int(word.left), int(word.top))
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self):
@@ -155,7 +156,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		except ValueError:
 			select = langs.index('eng')
 		choices = [languageHandler.getLanguageDescription(tesseractLangsToLocales[lang]) or tesseractLangsToLocales[lang] for lang in langs]
-		log.debug(u"Available OCR languages: %s", u", ".join(choices))
+		log.debug("Available OCR languages: %s", ", ".join(choices))
 		dialog = wx.SingleChoiceDialog(gui.mainFrame, _("Select OCR Language"), _("OCR Settings"), choices=choices)
 		dialog.SetSelection(select)
 		gui.mainFrame.prePopup()
@@ -197,7 +198,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		try:
 			hocrFile = baseFile + ".html"
 
-			parser = HocrParser(file(hocrFile).read(),
+			parser = HocrParser(open(hocrFile,encoding='utf8').read(),
 				left, top)
 		finally:
 			try:
@@ -248,11 +249,11 @@ localesToTesseractLangs = {
 "uk" : "ukr",
 "vi" : "vie"
 }
-tesseractLangsToLocales = {v : k for k, v in localesToTesseractLangs.iteritems()}
+tesseractLangsToLocales = {v : k for k, v in localesToTesseractLangs.items()}
 
 def getAvailableTesseractLanguages():
-	dataDir = unicode(os.path.join(os.path.dirname(__file__), "tesseract", "tessdata"), "mbcs")
-	dataFiles = [file for file in os.listdir(dataDir) if file.endswith(u'.traineddata')]
+	dataDir = os.path.join(os.path.dirname(__file__), "tesseract", "tessdata")
+	dataFiles = [file for file in os.listdir(dataDir) if file.endswith('.traineddata')]
 	return [os.path.splitext(file)[0] for file in dataFiles]
 
 def getDefaultLanguage():
